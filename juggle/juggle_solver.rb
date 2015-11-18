@@ -1,6 +1,6 @@
 require 'byebug'
 file = File.open("juggle_small.txt")
-#file = File.open("jugglefest.txt")
+file = File.open("jugglefest.txt")
 circuits = []
 
 jugglers = []
@@ -32,17 +32,15 @@ c.each_key { |key| circuit_scores[key] = {} }
 
 # build a hash of courses, with hash containing the scores 
 # of each juggler for that circuit
-c.each_key do |circuit|
-  j.each_key do |juggler|
-    0.upto(2) do |pref|
-      if j[juggler][:preference][pref] == circuit
-        circuit_scores[circuit][juggler] = ( c[j[juggler][:preference][pref]]["H"] * j[juggler]["H"] ) +
-                                         ( c[j[juggler][:preference][pref]]["E"] * j[juggler]["E"] ) +
-                                         ( c[j[juggler][:preference][pref]]["P"] * j[juggler]["P"] )   
-      end
-    end
+j.each_key do |juggler|
+  0.upto(j["J0"][:preference].size - 1) do |pref|
+    circuit = j[juggler][:preference][pref]
+    circuit_scores[circuit][juggler] = ( c[circuit]["H"] * j[juggler]["H"] ) +
+                                       ( c[circuit]["E"] * j[juggler]["E"] ) +
+                                       ( c[circuit]["P"] * j[juggler]["P"] )   
   end
 end
+
 
 ######
 circuit_jugglers = {}
@@ -66,13 +64,18 @@ def circuits_filled?(circuit_jugglers, circuits_list)
 end
 
 # continue until target has been hit for each circuit. Start at first choice (i = 0)
-z = 0
+
+checked = {}
 circuit_no = 0
+j.each_key { |key| checked[key] = [-1] }
+
+
 until circuits_filled?(circuit_jugglers, circuits_list) == circuits.size
-  byebug
   juggler_list.each do |juggler|
     unless circuit_jugglers.flatten.flatten.include?(juggler)
-      circuit_no = j[juggler][:preference][z]
+      pos = checked[juggler].last + 1
+      checked[juggler] << pos
+      circuit_no = j[juggler][:preference][pos]
       circuit_jugglers[circuit_no] << [juggler, circuit_scores[circuit_no][juggler]] # add juggler to their next pick
       circuit_jugglers[circuit_no].sort_by! { |x, y| y }.reverse! # order circuit_jugglers for circuit in descending score order
       if circuit_jugglers[circuit_no].count > 4 
@@ -81,7 +84,6 @@ until circuits_filled?(circuit_jugglers, circuits_list) == circuits.size
       end
     end
   end
-  z += 1
 end
 
 
