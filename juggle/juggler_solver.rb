@@ -71,7 +71,7 @@ class JugglerSolver
   # as a tie-breaker for even scores.
   def sort_jugglers(circuit_jugglers)
     circuit_jugglers.each do |course, jugglers|
-      sorted_jugglers = jugglers.sort! { |x,y|
+      sorted_jugglers = jugglers.sort! do |x,y|
         # get x juggler's score
         jug_x_score = x[:scores][y[:current_pref]].values[0]
         # get y juggler's score
@@ -84,7 +84,7 @@ class JugglerSolver
         else
           jug_y_score <=> jug_x_score
         end
-      }
+      end
     end
   end
 
